@@ -8,6 +8,10 @@ import Inventory from './components/pages/Inventory';
 import Network from './components/pages/Network';
 import Operating from './components/pages/Operating';
 import Security from './components/pages/Security';
+import axios from 'axios';
+
+axios.defaults.baseURL = 'http://localhost:4000';
+
 
 function App() {
   return (
