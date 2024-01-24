@@ -5,15 +5,17 @@ import withReactContent from 'sweetalert2-react-content';
 import Swal from 'sweetalert2';
 import '../pages/Products.css'
 
-const Inventory = () => {
+const Security = () => {
   const [inventory, setInventory] = useState({ data: [] });//Tabla Govern (GV)
   const [identify, setIdentify] = useState({ data: [] });//Tabla Identify (ID)
   const [protect, setProtect] = useState({ data: [] });//Tabla Protect (PR)
   const [detect, setDetect] = useState({ data: [] });//Tabla DETECT (DE)
   const [responds, setResponds] = useState({ data: [] });//Tabla Responds (RS)
   const [recover, setRecover] = useState({ data: [] });//Tabla Responds (RS)
+  const [subCategory, setsubCategory] = useState({ data: [] });//Tabla Responds (RS)
+  const [average, setAverage] = useState(''); // Promedio
 
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(''); //OBJETO CON DATOS 
 
   const [itemId, setItemId] = useState(''); //ID POR PARTE DEL FRONT
   const [title, setTitle]=useState('');
@@ -23,36 +25,34 @@ const Inventory = () => {
 //NUESTROS OBJETOS: ESTOS CONTIENEN NUESTROS ARRAYS DE CADA "DROPBOX".
 
 
-
-  
-
-
-
-
 useEffect(() => { //INVENTORY
   getInventory();
   }, []);
 
 
-useEffect(() => { //INVENTORY
+useEffect(() => { //getIdentify
   getIdentify();
   }, []);
 
-useEffect(() => { //INVENTORY
+useEffect(() => { //getProtect
   getProtect();
   }, []);
 
-useEffect(() => { //INVENTORY
+useEffect(() => { //getDetect
   getDetect();
   }, []);
 
-
-useEffect(() => { //INVENTORY
+useEffect(() => { //getResponds
   getResponds();
   }, []);
 
-useEffect(() => { //INVENTORY
+useEffect(() => { //getRecover
   getRecover();
+  }, []);
+
+
+useEffect(() => { //subCategory
+  getsubCategory();
   }, []);
 
 
@@ -103,7 +103,6 @@ const getResponds= async () => {
       // Puedes manejar el error según tus necesidades
   }
 };
-
 const getRecover= async () => {
   try {
       const respuesta = await axios.get('/RecoverRC');
@@ -114,8 +113,18 @@ const getRecover= async () => {
   }
 };
 
+const getsubCategory= async () => {
+  try {
+      const respuesta = await axios.get('/SubCategory');
+      setsubCategory({ data: respuesta.data }); // Ajustar aquí
+  } catch (error) {
+      console.error('Error al obtener datos:', error.message);
+      // Puedes manejar el error según tus necesidades
+  }
+};
 
-  const openModal = (op, id, category) =>{
+
+const openModal = (op, id, category) =>{
     console.log('op:', op);
     console.log('id:', id)
    
@@ -216,7 +225,12 @@ const getRecover= async () => {
     });
   }
 
-  let contador = 0;
+  let contador = 0; //  ESTO SIRVE PARA EL MAPEO
+
+  console.log("XDXDXD",average);
+
+
+ 
 
   return (
     <div className='App'>
@@ -262,8 +276,9 @@ const getRecover= async () => {
                             <tr key={item.Inventory_id}>
                               {imprimirCampo1 ? <td rowSpan={6}>{item.Function_description}</td> : null}
                               <td>{item.Category_name}<button onClick={() => openModal(1)} className='btn' data-bs-toggle='modal' data-bs-target='#modalSubcategory'>
-                <i className='fa-solid fa-circle-plus'></i> 
-              </button></td>
+                                    <i className='fa-solid fa-circle-plus'></i> 
+                                  </button>
+                              </td>
                               <td>{item.CategoryIdentifier_name}</td>
                               <td>0.8</td>
                               {imprimirPromedio ?<td rowSpan={6}>0.45</td>: null}
@@ -365,7 +380,7 @@ const getRecover= async () => {
                     </table>
               </div>
             </div>
-          </div>
+        </div>
 
       <div id='modalInventory' className='modal fade' aria-hidden='true'>
         <div className="modal-dialog">
@@ -396,10 +411,20 @@ const getRecover= async () => {
           </div>
         </div>
       </div>
+    
       <div id='modalSubcategory' className='modal fade' aria-hidden='true'>
-        <div className="modal-dialog">
-          <div className="modal-content">
-          <table className='table table-bordered'>
+        <div className='modal-dialog'>
+          
+        </div>
+        <div className="modal-content">
+          <div className="modal-bordered">
+            <div className="modal-header">
+            <label className='h5'>{category} </label>
+              <button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+            </div>
+          </div>
+            
+            <table className='table table-bordered'>
                       <thead className='th_navbar'>
                         <tr>
                           <th>Category</th>
@@ -410,13 +435,36 @@ const getRecover= async () => {
                         </tr>
                       </thead>
                       <tbody className='table-group-divider'>
-                        
+                        {subCategory.data.map((item) => {
+                          let imprimirCampo1 = false;
+                          if (contador % 11 === 0) {
+                            imprimirCampo1 = true;
+                          }
+                          contador++;
+                          return (
+                            <tr key={item.Inventory_id}>
+                              {imprimirCampo1 ? <td rowSpan={5}>{item.Category_description}</td> : null}
+                              <td>{item.SubCategory_description}</td>
+                              <td><input type="file" /></td>
+                              <td className='small'>
+                                <select id='average' className='form-select' value={average} onChange={(ev) => setAverage(ev.target.value)}>
+                                  <option value="pending">pending...</option>
+                                  <option value="1">Ok</option>
+                                  <option value="0">Ng</option>
+                                </select> 
+                              </td>
+                              <td><textarea name="" id="" cols="10" rows="2">{item.Comment}</textarea></td>
+                            </tr>
+                          )
+                        })}
+                          <div className="contenedor">
+                            <button type='button' className='btn'> SUBMIT</button>
+                          </div>
                       </tbody>
-           </table>
-          </div>
-        </div>
+                    </table>
+                  </div>
       </div>
     </div>
   );
 }
-export default Inventory;
+export default Security;
